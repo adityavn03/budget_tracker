@@ -8,26 +8,27 @@ const App = () => {
   const [budgets, setBudgets] = useState({});
   const [expenses, setExpenses] = useState({});
   const [expenseDetails, setExpenseDetails] = useState({});
+  const [expenseDates, setExpenseDates] = useState({});
 
   const addCategory = () => {
+    const defaultCategories = ["Sample Category", "Default Category"];
     if (newCategory && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory]);
-      setBudgets({ ...budgets, [newCategory]: 0 });
-      setExpenses({ ...expenses, [newCategory]: 0 });
-      setExpenseDetails({ ...expenseDetails, [newCategory]: [] });
+      // Check if the new category is one of the sample categories
+      if (defaultCategories.includes(newCategory)) {
+        alert("This category name is not allowed. Please choose a unique name.");
+      } else {
+        setCategories([...categories, newCategory]);
+        setBudgets({ ...budgets, [newCategory]: 0 });
+        setExpenses({ ...expenses, [newCategory]: 0 });
+        setExpenseDetails({ ...expenseDetails, [newCategory]: [] });
+        setExpenseDates({ ...expenseDates, [newCategory]: "" });
+      }
+    } else {
+      if (!newCategory) {
+        alert("Category name cannot be empty.");
+      }
     }
     setNewCategory("");
-  };
-
-  const deleteCategory = (category) => {
-    setCategories(categories.filter((cat) => cat !== category));
-    const { [category]: _, ...newBudgets } = budgets;
-    const { [category]: __, ...newExpenses } = expenses;
-    const { [category]: ___, ...newExpenseDetails } = expenseDetails;
-
-    setBudgets(newBudgets);
-    setExpenses(newExpenses);
-    setExpenseDetails(newExpenseDetails);
   };
 
   const updateBudget = (category, amount) => {
@@ -46,6 +47,10 @@ const App = () => {
         [category]: (expenses[category] || 0) + parseFloat(amount),
       });
     }
+  };
+
+  const handleDateChange = (category, date) => {
+    setExpenseDates({ ...expenseDates, [category]: date });
   };
 
   const budgetData = {
@@ -144,18 +149,21 @@ const App = () => {
                   addExpense(
                     category,
                     e.target.value,
-                    new Date().toISOString().split("T")[0],
+                    expenseDates[category] || new Date().toISOString().split("T")[0],
                     "Default description"
                   )
                 }
               />
             </div>
-            <button
-              onClick={() => deleteCategory(category)}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-            >
-              Delete Category
-            </button>
+            <div className="mb-2">
+              <label className="block text-sm mb-1">Expense Date:</label>
+              <input
+                type="date"
+                value={expenseDates[category] || ""}
+                onChange={(e) => handleDateChange(category, e.target.value)}
+                className="border border-gray-600 px-3 py-2 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+              />
+            </div>
           </div>
         ))}
       </div>
